@@ -25,7 +25,7 @@ func TestMainHandlerWrongCity(t *testing.T) {
 	mainHandle(rr, req)
 
 	require.Equal(t, http.StatusBadRequest, rr.Code, "Код ответа не 400")
-	assert.Equal(t, "wrong city value", rr.Body.String(), "Ошибка в теле ответа")
+	assert.Equal(t, "wrong city value", rr.Body.String(), "Ошибка")
 }
 
 func TestMainHandlerWhenCountMoreThanTotal(t *testing.T) {
