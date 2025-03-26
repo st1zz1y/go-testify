@@ -12,29 +12,33 @@ import (
 
 func TestMainHandlerCorrectRequest(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/cafe?city=moscow&count=2", nil)
-	rr := httptest.NewRecorder()
-	mainHandle(rr, req)
+	responseRecorder := httptest.NewRecorder()
+	handler := http.HandlerFunc(mainHandle)
+	handler.ServeHTTP(responseRecorder, req)
 
-	require.Equal(t, http.StatusOK, rr.Code, "Код ответа не 200")
-	assert.NotEmpty(t, rr.Body.String(), "Тело ответа пустое")
+	require.Equal(t, http.StatusOK, responseRecorder.Code)
+	assert.NotEmpty(t, responseRecorder.Body.String())
+	cafes := strings.Split(responseRecorder.Body.String(), ",")
+	assert.Len(t, cafes, 2)
 }
 
 func TestMainHandlerWrongCity(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/cafe?city=london&count=2", nil)
-	rr := httptest.NewRecorder()
-	mainHandle(rr, req)
+	responseRecorder := httptest.NewRecorder()
+	handler := http.HandlerFunc(mainHandle)
+	handler.ServeHTTP(responseRecorder, req)
 
-	require.Equal(t, http.StatusBadRequest, rr.Code, "Код ответа не 400")
-	assert.Equal(t, "wrong city value", rr.Body.String(), "Ошибка")
+	require.Equal(t, http.StatusBadRequest, responseRecorder.Code)
+	assert.Equal(t, "wrong city value", responseRecorder.Body.String())
 }
 
 func TestMainHandlerWhenCountMoreThanTotal(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/cafe?city=moscow&count=10", nil)
-	rr := httptest.NewRecorder()
-	mainHandle(rr, req)
+	responseRecorder := httptest.NewRecorder()
+	handler := http.HandlerFunc(mainHandle)
+	handler.ServeHTTP(responseRecorder, req)
 
-	require.Equal(t, http.StatusOK, rr.Code, "Код ответа не 200")
-
-	cafes := strings.Split(rr.Body.String(), ",")
-	assert.Len(t, cafes, 4, "Количество кафе не равно 4")
+	require.Equal(t, http.StatusOK, responseRecorder.Code)
+	cafes := strings.Split(responseRecorder.Body.String(), ",")
+	assert.Len(t, cafes, 4)
 }
